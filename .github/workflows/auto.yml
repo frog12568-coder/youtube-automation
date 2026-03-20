@@ -1,4 +1,30 @@
-- name: Upload video file
+name: Auto Video
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+
+      - name: Install tools
+        run: |
+          pip install gtts
+          sudo apt update
+          sudo apt install -y ffmpeg
+
+      - name: Run script
+        run: python main.py
+
+      - name: Upload video file
         uses: actions/upload-artifact@v4
         with:
           name: output-video
