@@ -1,0 +1,5 @@
+- name: Upload video file
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-video
+          path: output.mp4
