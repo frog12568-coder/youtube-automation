@@ -17,7 +17,7 @@ jobs:
 
       - name: Install tools
         run: |
-          pip install gtts
+          pip install gtts requests
           sudo apt update
           sudo apt install -y ffmpeg
 
