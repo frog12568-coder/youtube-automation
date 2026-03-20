@@ -4,41 +4,54 @@ import requests
 import time
 from gtts import gTTS
 
-print(">> Zoro Pro Video Mode: Zoom + Motion Active...")
+print(">> Zoro Story-Sync Mode: Downloading Relevant Images...")
 
-# ==========================================
-# STEP 1: Unique Story
-# ==========================================
-starts = ["Sannate ko chirte hue Zoro ki talwar garji.", "Andheri raaton ka wo akela rahi, Zoro.", "Jab zulm badhta hai, tab Zoro nikalta hai."]
-middles = ["Dushman hazar hain, magar uski ek talwar kaafi hai.", "Wo thakta nahi, wo rukta nahi, bas badhta jata hai.", "Uska nishana kabhi nahi chukta."]
-ends = ["Zoro ka insaaf abhi shuru hua hai.", "Yaad rakhna, Zoro laut kar zaroor ayega.", "Ye sirf aaghaz hai, anjam abhi baaki hai."]
-
-script = f"{random.choice(starts)} {random.choice(middles)} {random.choice(ends)}"
-voice_filename = "voice.mp3"
-
-# Voice Generation
-tts = gTTS(text=script, lang='hi')
-tts.save(voice_filename)
-
-# ==========================================
-# STEP 2: Images Download
-# ==========================================
-image_urls = [
-    "https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?q=80&w=720&h=1280&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=720&h=1280&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1509248961158-e54f6934749c?q=80&w=720&h=1280&auto=format&fit=crop"
+# --- STEP 1: Unique Zoro Script & Keywords ---
+# Humne har part ke sath ek keyword jora hai taaki image story se match kare
+stories = [
+    {
+        "text": "Andheri raaton ka wo akela rahi, Zoro phir laut aaya hai.",
+        "keywords": ["night-city", "dark-warrior", "moonlight"]
+    },
+    {
+        "text": "Jab zulm had se badhta hai, tab Zoro ki talwar garajti hai.",
+        "keywords": ["angry-man", "sword-fight", "fire-background"]
+    },
+    {
+        "text": "Dushman hazar hain, magar Zoro ki ek talwar hi kaafi hai.",
+        "keywords": ["samurai-action", "victory", "shadow-ninja"]
+    }
 ]
 
-for i, url in enumerate(image_urls):
-    res = requests.get(url)
-    with open(f"img{i}.jpg", "wb") as f:
-        f.write(res.content)
+selected = random.choice(stories)
+script = selected["text"]
+keywords = selected["keywords"]
 
-# ==========================================
-# STEP 3: Professional FFmpeg (Zoom + Music)
-# ==========================================
-# Hum yahan 'zoompan' filter use kar rahe hain jo image ko animate karega
-cmd = (
+print(f"[{time.strftime('%H:%M:%S')}] Story: {script}")
+
+# --- STEP 2: Voiceover Generation ---
+voice_file = "voice.mp3"
+tts = gTTS(text=script, lang='hi')
+tts.save(voice_file)
+
+# --- STEP 3: Downloading Images based on Keywords ---
+# Har keyword ke liye Unsplash se alag image download hogi
+for i, word in enumerate(keywords):
+    filename = f"img{i}.jpg"
+    print(f"Downloading image for '{word}'...")
+    url = f"https://images.unsplash.com/photo-1?q=80&w=720&h=1280&auto=format&fit=crop&{word}"
+    
+    try:
+        res = requests.get(url, timeout=15)
+        with open(filename, "wb") as f:
+            f.write(res.content)
+        print(f"Image {i+1} ({word}) saved!")
+    except:
+        print(f"Failed to get image for {word}")
+
+# --- STEP 4: Cinematic Rendering (Zoom Effect) ---
+# Ye images ko hilaayega (Motion) taaki video boring na lage
+ffmpeg_cmd = (
     "ffmpeg -y "
     "-loop 1 -t 5 -i img0.jpg -loop 1 -t 5 -i img1.jpg -loop 1 -t 5 -i img2.jpg "
     "-i voice.mp3 "
@@ -50,6 +63,6 @@ cmd = (
     "-map \"[v]\" -map 3:a -c:v libx264 -pix_fmt yuv420p -shortest output.mp4"
 )
 
-print("Rendering Professional Video...")
-os.system(cmd)
-print("Done!")
+print("Rendering Professional Zoro Video...")
+os.system(ffmpeg_cmd)
+print("SUCCESS: Story-Sync Video Created!")
